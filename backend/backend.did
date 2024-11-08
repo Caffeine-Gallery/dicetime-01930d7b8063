@@ -1,0 +1,10 @@
+service : {
+  completeChallenge: () -> (bool);
+  getCurrentChallenge: () ->
+   (record {
+      active: bool;
+      challenge: text;
+      timeRemaining: int;
+    }) query;
+  startNewChallenge: () -> (text);
+}
