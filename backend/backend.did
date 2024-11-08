@@ -1,9 +1,14 @@
 service : {
   completeChallenge: () -> (bool);
+  getCompletedChallenges: () -> (vec record {
+                                       text;
+                                       int;
+                                     }) query;
   getCurrentChallenge: () ->
    (record {
       active: bool;
       challenge: text;
+      startTime: int;
       timeRemaining: int;
     }) query;
   startNewChallenge: () -> (text);

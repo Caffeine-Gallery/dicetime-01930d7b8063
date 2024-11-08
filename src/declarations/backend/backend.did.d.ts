@@ -4,9 +4,15 @@ import type { IDL } from '@dfinity/candid';
 
 export interface _SERVICE {
   'completeChallenge' : ActorMethod<[], boolean>,
+  'getCompletedChallenges' : ActorMethod<[], Array<[string, bigint]>>,
   'getCurrentChallenge' : ActorMethod<
     [],
-    { 'active' : boolean, 'challenge' : string, 'timeRemaining' : bigint }
+    {
+      'startTime' : bigint,
+      'active' : boolean,
+      'challenge' : string,
+      'timeRemaining' : bigint,
+    }
   >,
   'startNewChallenge' : ActorMethod<[], string>,
 }

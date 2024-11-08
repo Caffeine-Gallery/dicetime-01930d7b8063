@@ -45,6 +45,29 @@ h1 {
     margin: 1rem auto;
 }
 
+.history-list {
+    margin-top: 1rem;
+    text-align: left;
+}
+
+.history-item {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-item .challenge {
+    margin-bottom: 0.25rem;
+    color: #333;
+}
+
+.history-item .text-muted {
+    font-size: 0.875rem;
+}
+
 @media (max-width: 576px) {
     .challenge-box {
         margin: 1rem;

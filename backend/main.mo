@@ -9,12 +9,33 @@ import Nat "mo:base/Nat";
 import Debug "mo:base/Debug";
 import Blob "mo:base/Blob";
 import Nat8 "mo:base/Nat8";
+import Buffer "mo:base/Buffer";
 
 actor {
     // Stable variables for persistence
     stable var currentChallenge : Text = "";
     stable var endTime : Int = 0;
     stable var isActive : Bool = false;
+    stable var completedChallengesEntries : [(Text, Int)] = [];
+
+    private let completedChallenges = Buffer.Buffer<(Text, Int)>(0);
+
+    // Initialize the buffer with stable data
+    private func loadStableData() {
+        for ((challenge, timestamp) in completedChallengesEntries.vals()) {
+            completedChallenges.add((challenge, timestamp));
+        };
+    };
+
+    loadStableData();
+
+    system func preupgrade() {
+        completedChallengesEntries := Buffer.toArray(completedChallenges);
+    };
+
+    system func postupgrade() {
+        loadStableData();
+    };
 
     // Array of possible challenges
     let challenges : [Text] = [
@@ -30,46 +51,49 @@ actor {
         "Practice deep breathing"
     ];
 
-    // Generate a random number between 0 and max-1
     private func randomNumber(max: Nat) : async Nat {
         let random = await Random.blob();
         let randomBytes = Blob.toArray(random);
         if (randomBytes.size() == 0) {
-            return 0; // fallback value if we can't get random bytes
+            return 0;
         };
         let randomByte = randomBytes[0];
         return Nat8.toNat(randomByte) % max;
     };
 
-    // Start a new challenge
     public func startNewChallenge() : async Text {
         let index = await randomNumber(challenges.size());
         currentChallenge := challenges[index];
-        endTime := Time.now() + (15 * 60 * 1000_000_000); // 15 minutes in nanoseconds
+        endTime := Time.now() + (15 * 60 * 1000_000_000);
         isActive := true;
         return currentChallenge;
     };
 
-    // Get current challenge status
     public query func getCurrentChallenge() : async {
         challenge: Text;
         timeRemaining: Int;
         active: Bool;
+        startTime: Int;
     } {
         let remaining = if (isActive) { endTime - Time.now() } else { 0 };
         return {
             challenge = currentChallenge;
             timeRemaining = remaining;
             active = isActive;
+            startTime = endTime - (15 * 60 * 1000_000_000);
         };
     };
 
-    // Complete current challenge
     public func completeChallenge() : async Bool {
         if (isActive) {
             isActive := false;
+            completedChallenges.add((currentChallenge, Time.now()));
             return true;
         };
         return false;
+    };
+
+    public query func getCompletedChallenges() : async [(Text, Int)] {
+        return Buffer.toArray(completedChallenges);
     };
 }
